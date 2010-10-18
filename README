@@ -25,7 +25,7 @@ Install dependencies
 
 Getting cloudcluster
 
-    1. git clone https://pdmars@github.com/pdmars/cloudcluster.git
+    1. git clone git://github.com/pdmars/cloudcluster.git
 
 Using cloudcluster
 
