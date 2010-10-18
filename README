@@ -5,7 +5,7 @@ cloudcluster
     Thus, it is assumed that you are already setup on Amazon EC2 and can launch
     and terminate instances on demand.
 
-    cloudcluster assumes you want to launch a "class" of clusters. A class 
+    cloudcluster allows you to launch a "class" of clusters. A class 
     is a group of 1 or more clusters. Each cluster contains 1 or more
     instances. cloudcluster will launch the clusters on the cloud, generate
     random root passwords for the instances (and set them), and configure 
