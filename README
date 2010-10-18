@@ -1,0 +1,57 @@
+cloudcluster
+
+    cloudcluster is Python program for launching and managing clusters of
+    instances in the cloud. Amazon EC2 is currently the only supported cloud.
+    Thus, it is assumed that you are already setup on Amazon EC2 and can launch
+    and terminate instances on demand.
+
+    cloudcluster assumes you want to launch a "class" of clusters. A class 
+    is a group of 1 or more clusters. Each cluster contains 1 or more
+    instances. cloudcluster will launch the clusters on the cloud, generate
+    random root passwords for the instances (and set them), and configure 
+    /etc/hosts on each of the clusters so that headnode, node1, node2, etc. 
+    reference the IP addresses of all of the instances in a particular 
+    cluster. Additionally, you can then query the status of all of the
+    instances and terminate them with cloudcluster.
+
+Install dependencies
+
+    1. python 2.5+ 
+       http://python.org/
+    2. libcloud
+       http://incubator.apache.org/libcloud/
+    3. git
+       http://git-scm.com/
+
+Getting cloudcluster
+
+    1. git clone https://pdmars@github.com/pdmars/cloudcluster.git
+
+Using cloudcluster
+
+    Configure the settings in cloudcluster.conf
+        Specifically:
+            - Place your Amazon Access ID in a file pointed to by
+              ACCESS_ID_FILE
+            - Place your Amazon Secret Key in a file pointed to by
+              SECRET_KEY_FILE
+
+    Specific notes
+        - Don't use spaces in the cloudcluster.conf configuration values
+        - Don't use spaces in the class name that you specify, cluster, node,
+          and instance names will automatically be generated when you start a
+          class or add additional clusters to a class
+
+    Getting started
+        python cccontrol.py -h
+
+Assumptions made by cloudcluster
+
+    - The cloud is Amazon EC2 (or equivalent)
+    - The cloud image is Linux
+    - The cloud image must have the host command in order to configure 
+      /etc/hosts; in Debian this is in the package dnsutils
+    - The cloud image must accept passwordless root SSH logins (for example,
+      using SSH keys - specifically, the keypair specified in 
+      cloudluster.conf)
+    - The local system must have the ssh command in the path
