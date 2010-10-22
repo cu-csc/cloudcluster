@@ -84,42 +84,45 @@ class CCClass:
             self.cccloud.kill_node(node_name)
             self.db.set_instance_state(node_name, NodeState.TERMINATED)
 
-    def append_hosts_file(self, node_names):
+    def configure_cluster(self, node_names):
         for host_name in node_names:
             ip = self.db.get_instance_ip_address(host_name)
+            name_to_set = self.db.get_instance_name(host_name)
+            logger.info('Configuring host %s' % ip)
             etc_hosts = ''
             for node_name in node_names:
                 name = self.db.get_instance_name(node_name)
                 private_ip = self.db.get_instance_private_ip(node_name)
                 app_str = 'ssh -o \'StrictHostKeyChecking no\' -i %s ' + \
-                          'root@%s \"echo %s %s >> /etc/hosts\"'
+                          'root@%s \"echo %s %s >> /etc/hosts %s\"'
                 in_str = '\`host %s | awk \'{print \$4}\'\`' % private_ip
+                last_str = ';hostname %s' % name_to_set
                 ssh_str = app_str % (self.cccloud.keypair_file, \
                                      ip, \
                                      in_str, \
-                                     name)
+                                     name, \
+                                     last_str)
                 logger.debug(ssh_str)
                 (status, output) = commands.getstatusoutput(ssh_str)
                 if status != 0:
-                    logger.error('Problem appending to /etc/hosts ' + \
-                                 'on %s' % ip)
+                    logger.error('Problem configuring ' + \
+                                 '%s' % ip)
                     print output
 
-    def setup_cluster_hosts(self):
-        logger.info('Appending to /etc/hosts')
+    def configure_hosts(self):
         self.query(False) 
         node_names = []
         if self.cluster_name != '':
             node_names = self.db.get_all_cluster_node_names(self.name, \
                                                             self.cluster_name)
-            self.append_hosts_file(node_names)
+            self.configure_cluster(node_names)
         else:
             cluster_counts = self.db.get_all_cluster_counts(self.name)
             for cluster_count in cluster_counts:
                 cluster_name = 'cluster%s' % cluster_count
                 node_names = self.db.get_all_cluster_node_names(self.name, \
                                                                 cluster_name)
-                self.append_hosts_file(node_names)
+                self.configure_cluster(node_names)
 
     def deploy_cluster(self, instances=0):
         count = self.db.get_new_cluster_count(self.name)
