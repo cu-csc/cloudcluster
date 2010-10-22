@@ -44,7 +44,7 @@ class CCClass:
             cluster_counts.sort()
 
             for cluster_count in cluster_counts:
-                cluster_name = 'cluster%s' % cluster_count
+                cluster_name = 'cluster%02d' % cluster_count
                 print 'cluster: %s' % cluster_name
                 node_names = self.db.get_all_cluster_node_names(self.name, \
                                                                 cluster_name)
@@ -124,15 +124,15 @@ class CCClass:
     def deploy_cluster(self, instances=0):
         count = self.db.get_new_cluster_count(self.name)
         self.db.add_cluster(self.name, count)
-        cluster_name = 'cluster%s' % count
+        cluster_name = 'cluster%02d' % count
         logger.info('launching new cluster %s:%s' % (self.name, cluster_name))
         for i in range(instances):
             if i == 0:
                 headnode = 1
-                name = 'headnode'
+                name = '%s-headnode' % cluster_name
             else:
                 headnode = 0
-                name = 'node%s' % i
+                name = '%s-node%02d' % (cluster_name, i)
             logger.info('launching new instance ' + \
                         '%s:%s:%s' % (self.name, cluster_name, name))
             node_name, state = self.cccloud.launch_node(name)
