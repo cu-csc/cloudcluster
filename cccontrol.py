@@ -117,10 +117,12 @@ def parse_options():
                     dest='addCluster', help='add a cluster to a class ' + \
                     '(specify classname and -i)')
     main.add_option('-p', '--setPasswords', action='store_true', \
-                    dest='setPasswords', help='set the root passwords ')
+                    dest='setPasswords', help='set the root passwords ' + \
+                    'of a class or cluster')
     main.add_option('-l', '--configureClusters', action='store_true', \
                     dest='configureClusters', help='configure the ' + \
-                    'clusters /etc/hosts file and set the hostname ')
+                    'clusters /etc/hosts file and set the hostnames ' + \
+                    'of a class or cluster')
     parser.add_option_group(main)
 
     extra = OptionGroup(parser, 'Additional Options', 'You might need these.')
