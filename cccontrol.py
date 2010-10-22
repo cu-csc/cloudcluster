@@ -11,27 +11,24 @@ import sys
 
 def check_options(options):
     rc = True
-    optionSet = [0]
-    if options.startClass:
-        names = options.startClass
-        optionSet.append(1)
-    if options.query:
-        names = options.query
-        optionSet.append(1)
-    if options.kill:
-        names = options.kill
-        optionSet.append(1)
-    if options.addCluster:
-        names = options.addCluster
-        optionSet.append(1)
-    if options.setPasswords:
-        names = options.setPasswords
-        optionSet.append(1)
-    if options.setupClusterHosts:
-        names = options.setupClusterHosts
-        optionSet.append(1)
+    names = options.name
+    optionSet = []
+    optionSet.append(int(options.startClass))
+    optionSet.append(int(options.query))
+    optionSet.append(int(options.kill))
+    optionSet.append(int(options.addCluster))
+    optionSet.append(int(options.setPasswords))
+    optionSet.append(int(options.configureClusters))
 
-    if len(optionSet) <= 1:
+    if not options.database:
+        logger.error('you must specify a database')
+        rc = False
+
+    if not options.name:
+        logger.error('you must specify a name')
+        rc = False
+
+    if len(optionSet) <= 0:
         logger.error('you must specify at least one main action')
         rc = False
     else:
@@ -51,7 +48,7 @@ def check_options(options):
 
     if options.startClass:
         if not (options.numInstances and options.numClusters):
-            logger.error('you must specify -n and -m when starting a class')
+            logger.error('you must specify -c and -i when starting a class')
             rc = False
         else:
             numInstances = int(options.numInstances)
@@ -62,13 +59,22 @@ def check_options(options):
                 print 'You are starting %s instances.' % total
                 answer = raw_input('Are you sure? (yes or no) ')
                 print
-                if (answer != 'Yes') or \
+                if (answer != 'Yes') and \
                    (answer != 'yes'):
                     rc = False
 
+    if options.kill:
+        print
+        answer = raw_input('Are you sure you want to kill instances? ' + \
+                           '(yes or no) ')
+        print
+        if (answer != 'Yes') and \
+           (answer != 'yes'):
+            rc = False
+
     if options.addCluster:
         if not options.numInstances:
-            logger.error('you must specify -n when adding a cluster')
+            logger.error('you must specify -i when adding a cluster')
             rc = False
         else:
             numInstances = int(options.numInstances)
@@ -77,7 +83,7 @@ def check_options(options):
                 print 'You are starting %s instances.' % numInstances
                 answer = raw_input('Are you sure? (yes or no) ')
                 print
-                if (answer != 'Yes') or \
+                if (answer != 'Yes') and \
                    (answer != 'yes'):
                     rc = False
 
@@ -92,48 +98,50 @@ def parse_options():
                    dest='database', help='location of the ' + \
                    'sqlite database file to use (this file will be ' + \
                    'created if it does not exist) [REQUIRED]')
+    req.add_option('-n', '--name', action='store', \
+                   dest='name', help='specify the name as classname ' + \
+                   'or classname:clustername [REQUIRED]')
     parser.add_option_group(req)
 
     main = OptionGroup(parser, 'Main Options', 'You must specify one ' + \
                        'and only one of these actions.')
 
-    main.add_option('-s', '--startClass', action='store', \
+    main.add_option('-s', '--startClass', action='store_true', \
                     dest='startClass', help='launch a class of ' + \
-                    ' instances (specify classname and include -m and -n)')
-    main.add_option('-q', '--query', action='store', \
-                    dest='query', help='query a class or cluster ' + \
-                    '(specify either classname or classname:' + \
-                    'clustername)')
-    main.add_option('-k', '--kill', action='store', \
-                    dest='kill', help='kill a class or cluster ' + \
-                    '(specify either classname or classname:' + \
-                    'clustername)')
-    main.add_option('-a', '--addCluster', action='store', \
+                    ' instances (specify the classname and -c and -i)')
+    main.add_option('-q', '--query', action='store_true', \
+                    dest='query', help='query a class or cluster ')
+    main.add_option('-k', '--kill', action='store_true', \
+                    dest='kill', help='kill a class or cluster ')
+    main.add_option('-a', '--addCluster', action='store_true', \
                     dest='addCluster', help='add a cluster to a class ' + \
-                    '(specify classname and include -n)')
-    main.add_option('-p', '--setPasswords', action='store', \
-                    dest='setPasswords', help='set the root passwords ' + \
-                    '(specify either classname or classname:' + \
-                    'clustername or classname:clustername:' + \
-                    'instancename)')
-    main.add_option('-c', '--setupClusterHosts', action='store', \
-                    dest='setupClusterHosts', help='configure the ' + \
-                    'clusters /etc/hosts file (specify either ' + \
-                    'classname or classname:clustername)')
+                    '(specify classname and -i)')
+    main.add_option('-p', '--setPasswords', action='store_true', \
+                    dest='setPasswords', help='set the root passwords ')
+    main.add_option('-l', '--configureClusters', action='store_true', \
+                    dest='configureClusters', help='configure the ' + \
+                    'clusters /etc/hosts file and set the hostname ')
     parser.add_option_group(main)
 
     extra = OptionGroup(parser, 'Additional Options', 'You might need these.')
 
-    extra.add_option('-m', '--numClusters', action='store', \
+    extra.add_option('-c', '--numClusters', action='store', \
                      dest='numClusters', help='number of clusters ' + \
                      'to launch')
-    extra.add_option('-n', '--numInstances', action='store', \
+    extra.add_option('-i', '--numInstances', action='store', \
                      dest='numInstances', help='number of instances ' + \
-                     'per cluster to launch, m * n total instances ' + \
+                     'per cluster to launch, c * i total instances ' + \
                      'will be launched, this includes the headnode')
     extra.add_option('-v', '--verbose', action='store_true', \
                      dest = 'verbose', help = 'Verbose output')
     parser.add_option_group(extra)
+
+    parser.set_defaults(startClass=False, \
+                        query=False, \
+                        kill=False, \
+                        addCluster=False, \
+                        setPasswords=False, \
+                        configureClusters=False)
 
     (options, args) = parser.parse_args()
 
@@ -141,18 +149,13 @@ def parse_options():
         sys.exit(1)
 
     names = ''
-    if options.startClass:
-        names = options.startClass
-    elif options.query:
-        names = options.query
-    elif options.kill:
-        names = options.kill
-    elif options.addCluster:
-        names = options.addCluster
-    elif options.setPasswords:
-        names = options.setPasswords
-    elif options.setupClusterHosts:
-        names = options.setupClusterHosts
+    if options.startClass or \
+       options.query or \
+       options.kill or \
+       options.addCluster or \
+       options.setPasswords or \
+       options.configureClusters:
+        names = options.name
 
     if options.verbose:
         logging.getLogger('').setLevel(logging.DEBUG)
@@ -187,8 +190,8 @@ def main():
         ccclass.kill()
     elif options.setPasswords:
         ccclass.set_root_passwords()
-    elif options.setupClusterHosts:
-        ccclass.setup_cluster_hosts()
+    elif options.configureClusters:
+        ccclass.configure_hosts()
     else:
         logger.error('you must specify one action')
         return 1
