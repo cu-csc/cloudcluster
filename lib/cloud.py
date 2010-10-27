@@ -57,9 +57,11 @@ class CCCloud:
         except:
             logger.error('problem killing node %s' % name)
 
-    def launch_node(self, name):
-        node = self.cloud_conn.create_node(name=name, \
-                                           image=self.image, \
-                                           size=self.size, \
-                                           ex_keyname=self.keypair_name)
-        return node.name, node.state
+    def launch_nodes(self, name, instances):
+        nodes = self.cloud_conn.create_node(name=name, \
+                                            image=self.image, \
+                                            size=self.size, \
+                                            ex_mincount=str(instances), \
+                                            ex_maxcount=str(instances), \
+                                            ex_keyname=self.keypair_name)
+        return nodes

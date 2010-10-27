@@ -129,22 +129,28 @@ class CCClass:
         self.db.add_cluster(self.name, count)
         cluster_name = 'cluster%02d' % count
         logger.info('launching new cluster %s:%s' % (self.name, cluster_name))
-        for i in range(instances):
+        new_nodes = self.cccloud.launch_nodes(cluster_name, instances)
+        if instances == 1:
+            nodes = [new_nodes]
+        else:
+            nodes = new_nodes
+        i = 0
+        for node in nodes:
             if i == 0:
                 headnode = 1
-                name = '%s-headnode' % cluster_name
+                name = '%s-head' % cluster_name
             else:
                 headnode = 0
                 name = '%s-node%02d' % (cluster_name, i)
-            logger.info('launching new instance ' + \
-                        '%s:%s:%s' % (self.name, cluster_name, name))
-            node_name, state = self.cccloud.launch_node(name)
+            node_name = node.name
+            state = node.state
             self.db.add_instance(self.name, \
                                  cluster_name, \
                                  name, \
                                  node_name, \
                                  headnode, \
                                  state)
+            i += 1
 
     def set_root_passwords(self):
         chpasswdStr = 'ssh -o \'StrictHostKeyChecking no\' -i %s ' + \
