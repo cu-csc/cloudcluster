@@ -119,7 +119,7 @@ class CCClass:
         else:
             cluster_counts = self.db.get_all_cluster_counts(self.name)
             for cluster_count in cluster_counts:
-                cluster_name = 'cluster%s' % cluster_count
+                cluster_name = 'cluster%02d' % cluster_count
                 node_names = self.db.get_all_cluster_node_names(self.name, \
                                                                 cluster_name)
                 self.configure_cluster(node_names)
