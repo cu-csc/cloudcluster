@@ -163,20 +163,30 @@ class CCClass:
                                                             self.cluster_name)
         else:
             node_names = self.db.get_all_node_names(self.name)
-        ips = []
+
+        cluster_counts = self.db.get_all_cluster_counts(self.name)
+        for cluster_count in cluster_counts:
+            cluster_name = 'cluster%02d' % cluster_count
+            cluster_nodes = self.db.get_all_cluster_node_names(self.name, \
+                                                               cluster_name)
+            new_password = util.generate_random_password()
+            for node_name in cluster_nodes:
+                password = self.db.get_instance_password(node_name)
+                if password == '':
+                    ip = self.db.get_instance_ip_address(node_name)
+                    self.db.set_instance_password(ip, new_password)
+
         for node_name in node_names:
             state = self.db.get_instance_state(node_name)
             if state == NodeState.RUNNING:
-                ip_address = self.db.get_instance_ip_address(node_name)
-                ips.append(ip_address)
-        for ip in ips:
-            password = util.generate_random_password()
-            setStr = chpasswdStr % (self.cccloud.keypair_file, ip, password)
-            logger.debug('EXE: %s' % setStr)
-            logger.info('Setting %s with password %s' % (ip, password))
-            (status, output) = commands.getstatusoutput(setStr)
-            if status != 0:
-                logger.error('Problem setting password')
-                print output
-            else:
-                self.db.set_instance_password(ip, password)
+                ip = self.db.get_instance_ip_address(node_name)
+                password = self.db.get_instance_password(node_name)
+                setStr = chpasswdStr % (self.cccloud.keypair_file, ip, password)
+                logger.debug('EXE: %s' % setStr)
+                logger.info('Setting %s with password %s' % (ip, password))
+                (status, output) = commands.getstatusoutput(setStr)
+                if status != 0:
+                    logger.error('Problem setting password')
+                    print output
+                else:
+                    self.db.set_instance_password(ip, password)
