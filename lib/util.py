@@ -39,6 +39,18 @@ def read_line(filename):
     theFile.close()
     return thevalue.strip()
 
+def read_password_file(filename):
+    theFile = open(filename, 'r')
+    lines = theFile.readlines()
+    theFile.close()
+    passwords = {}
+    for line in lines:
+        splitline = line.split()
+        cluster_name = splitline[0].strip()
+        password = splitline[1].strip()
+        passwords[cluster_name] = password
+    return passwords
+
 def generate_random_password(length=8):
     chars = string.letters + string.digits 
     symbols = '!@#%^&*'

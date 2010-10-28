@@ -8,6 +8,7 @@ from lib import util
 
 import logging
 import sys
+import os
 
 def check_options(options):
     rc = True
@@ -71,6 +72,16 @@ def check_options(options):
         if (answer != 'Yes') and \
            (answer != 'yes'):
             rc = False
+    if options.setPasswords:
+        if options.passwordFile:
+            options.passwordFile = os.path.expanduser(options.passwordFile)
+            if not os.path.isfile(options.passwordFile):
+                logger.error('password file does not exist: ' + \
+                             '%s' % options.passwordFile)
+                rc = False
+        else:
+            options.passwordFile = ''
+
 
     if options.addCluster:
         if not options.numInstances:
@@ -134,6 +145,9 @@ def parse_options():
                      dest='numInstances', help='number of instances ' + \
                      'per cluster to launch, c * i total instances ' + \
                      'will be launched, this includes the headnode')
+    extra.add_option('-f', '--passwordFile', action='store', \
+                     dest='passwordFile', help='a file containing the ' + \
+                     'passwords to set, in the format: clustername password')
     extra.add_option('-v', '--verbose', action='store_true', \
                      dest = 'verbose', help = 'Verbose output')
     parser.add_option_group(extra)
@@ -191,7 +205,7 @@ def main():
     elif options.kill:
         ccclass.kill()
     elif options.setPasswords:
-        ccclass.set_root_passwords()
+        ccclass.set_root_passwords(options.passwordFile)
     elif options.configureClusters:
         ccclass.configure_hosts()
     else:

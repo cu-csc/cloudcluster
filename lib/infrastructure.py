@@ -152,10 +152,15 @@ class CCClass:
                                  state)
             i += 1
 
-    def set_root_passwords(self):
+    def set_root_passwords(self, passwordFile=''):
         chpasswdStr = 'ssh -o \'StrictHostKeyChecking no\' -i %s ' + \
                       'root@%s \'echo root:%s | chpasswd\''
         self.query(False) 
+
+        passwords = {}
+        if passwordFile != '':
+            passwords = util.read_password_file(passwordFile)
+
         if self.instance_name != '':
             node_names = [self.instance_name]
         elif self.cluster_name != '':
@@ -169,7 +174,10 @@ class CCClass:
             cluster_name = 'cluster%02d' % cluster_count
             cluster_nodes = self.db.get_all_cluster_node_names(self.name, \
                                                                cluster_name)
-            new_password = util.generate_random_password()
+            try:
+                new_password = passwords[cluster_name]
+            except:
+                new_password = util.generate_random_password()
             for node_name in cluster_nodes:
                 password = self.db.get_instance_password(node_name)
                 if password == '':
