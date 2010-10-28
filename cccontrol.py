@@ -129,7 +129,9 @@ def parse_options():
                     '(specify classname and -i)')
     main.add_option('-p', '--setPasswords', action='store_true', \
                     dest='setPasswords', help='set the root passwords ' + \
-                    'of a class or cluster')
+                    'of a class or cluster (you can specify a file ' + \
+                    'containing passwords using -f or random passwords ' + \
+                    'will be generated)')
     main.add_option('-l', '--configureClusters', action='store_true', \
                     dest='configureClusters', help='configure the ' + \
                     'clusters /etc/hosts file and set the hostnames ' + \
