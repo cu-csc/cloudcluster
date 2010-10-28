@@ -41,7 +41,7 @@ def read_line(filename):
 
 def generate_random_password(length=8):
     chars = string.letters + string.digits 
-    symbols = '!@#$%^&*'
+    symbols = '!@#%^&*'
     password = ''
     for i in range(2):
         password = password + random.choice(chars)
