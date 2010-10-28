@@ -72,6 +72,7 @@ def check_options(options):
         if (answer != 'Yes') and \
            (answer != 'yes'):
             rc = False
+
     if options.setPasswords:
         if options.passwordFile:
             options.passwordFile = os.path.expanduser(options.passwordFile)
@@ -81,7 +82,6 @@ def check_options(options):
                 rc = False
         else:
             options.passwordFile = ''
-
 
     if options.addCluster:
         if not options.numInstances:
