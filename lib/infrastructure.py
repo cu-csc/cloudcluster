@@ -159,6 +159,7 @@ class CCClass:
 
         passwords = {}
         if passwordFile != '':
+            logger.debug('reading password file: %s' % passwordFile)
             passwords = util.read_password_file(passwordFile)
 
         if self.instance_name != '':
@@ -175,8 +176,12 @@ class CCClass:
             cluster_nodes = self.db.get_all_cluster_node_names(self.name, \
                                                                cluster_name)
             try:
+                logger.debug('getting cluster password for: ' + \
+                             '%s' % cluster_name)
                 new_password = passwords[cluster_name]
             except:
+                logger.debug('failed to get a password, generating a ' + \
+                             'random password instead')
                 new_password = util.generate_random_password()
             for node_name in cluster_nodes:
                 password = self.db.get_instance_password(node_name)

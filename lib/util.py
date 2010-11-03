@@ -1,5 +1,8 @@
 import random
 import string
+import logging
+
+logger = logging.getLogger('cloudcluster')
 
 def node_state_tostring(state):
     if state == 0:
@@ -46,9 +49,13 @@ def read_password_file(filename):
     passwords = {}
     for line in lines:
         splitline = line.split()
-        cluster_name = splitline[0].strip()
-        password = splitline[1].strip()
-        passwords[cluster_name] = password
+        try:
+            cluster_name = splitline[0].strip()
+            password = splitline[1].strip()
+            passwords[cluster_name] = password
+        except:
+            logger.debug('problem splitting password line: %s' % line)
+    logger.debug('read passwords: %s' % passwords)
     return passwords
 
 def generate_random_password(length=8):
