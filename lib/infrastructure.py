@@ -65,6 +65,9 @@ class CCClass:
 
         for node_name in node_names:
             instance = self.cccloud.get_instance(node_name)
+            if instance == None:
+                logger.warning("Instance %s does not exist" % node_name)
+                continue
             self.db.set_instance_state(node_name, instance.state)
             self.db.set_instance_ip_address(node_name, \
                                             instance.public_ip[0], \
