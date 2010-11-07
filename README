@@ -38,9 +38,9 @@ Using cloudcluster
 
     Specific notes
         - Don't use spaces in the cloudcluster.conf configuration values
-        - Don't use spaces in the class name that you specify, cluster, node,
-          and instance names will automatically be generated when you start a
-          class or add additional clusters to a class
+        - Don't use spaces in the class name that you specify. The cluster
+          and node names will be generated automatically when you start a
+          class or add an additional cluster to a class.
 
     Getting started
         python cccontrol.py -h
