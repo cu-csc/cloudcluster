@@ -179,19 +179,29 @@ class CCClass:
             cluster_name = 'cluster%02d' % cluster_count
             cluster_nodes = self.db.get_all_cluster_node_names(self.name, \
                                                                cluster_name)
+            file_password = ''
+            new_password = ''
             try:
                 logger.debug('getting cluster password for: ' + \
                              '%s' % cluster_name)
-                new_password = passwords[cluster_name]
+                file_password = passwords[cluster_name]
             except:
                 logger.debug('failed to get a password, generating a ' + \
                              'random password instead')
                 new_password = util.generate_random_password()
+            # If blank password in db, fill with either generated
+            # password or from file. If file password specified and is
+            # different than existing db password, use the file
+            # password. Does not set new password if db password not
+            # blank and file password not present or not different.
             for node_name in cluster_nodes:
                 password = self.db.get_instance_password(node_name)
-                if password == '':
+                if new_password != '' and password == '':
                     ip = self.db.get_instance_ip_address(node_name)
                     self.db.set_instance_password(ip, new_password)
+                elif file_password != '' and password != file_password:
+                    ip = self.db.get_instance_ip_address(node_name)
+                    self.db.set_instance_password(ip, file_password)
 
         for node_name in node_names:
             state = self.db.get_instance_state(node_name)
