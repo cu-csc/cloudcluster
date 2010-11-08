@@ -3,6 +3,7 @@ from lib import util
 
 import commands
 import logging
+import re
 
 logger = logging.getLogger('cloudcluster')
 
@@ -197,12 +198,17 @@ class CCClass:
             if state == NodeState.RUNNING:
                 ip = self.db.get_instance_ip_address(node_name)
                 password = self.db.get_instance_password(node_name)
-                setStr = chpasswdStr % (self.cccloud.keypair_file, ip, password)
+                escaped_password = re.escape(password)
+                setStr = chpasswdStr % (self.cccloud.keypair_file, ip,
+                                        escaped_password)
                 logger.debug('EXE: %s' % setStr)
                 logger.info('Setting %s with password %s' % (ip, password))
                 (status, output) = commands.getstatusoutput(setStr)
                 if status != 0:
                     logger.error('Problem setting password')
+                    print output
+                elif len(output) != 0:
+                    logger.warning('Possible problem setting password')
                     print output
                 else:
                     self.db.set_instance_password(ip, password)
