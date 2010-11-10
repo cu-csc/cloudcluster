@@ -53,6 +53,22 @@ class CCClass:
                     self.print_node(node_name)
         print
 
+    def ssh_command(self, command_string, action=''):
+        rc = 0
+        logger.debug('EXE: ' + command_string)
+        (status, output) = commands.getstatusoutput(command_string)
+        if status != 0:
+            rc = 1
+            logger.error('Problem running ssh command: ' + \
+                         '%s' % command_string)
+            print output
+        if (action == 'set_root_password') and \
+           (len(output) != 0):
+            rc = 1
+            logger.warning('Possible problem setting password')
+            print output
+        return rc
+
     def launch(self, clusters=0, instances=0):
         for i in range(clusters):
             self.deploy_cluster(instances)
@@ -106,12 +122,8 @@ class CCClass:
                                      in_str, \
                                      name, \
                                      last_str)
-                logger.debug(ssh_str)
-                (status, output) = commands.getstatusoutput(ssh_str)
-                if status != 0:
-                    logger.error('Problem configuring ' + \
-                                 '%s' % ip)
-                    print output
+                if self.ssh_command(ssh_str) != 0:
+                    logger.warn('Problem configuring %s (%s)' % (name, ip))
 
     def configure_hosts(self):
         self.query(False) 
@@ -211,14 +223,6 @@ class CCClass:
                 escaped_password = re.escape(password)
                 setStr = chpasswdStr % (self.cccloud.keypair_file, ip,
                                         escaped_password)
-                logger.debug('EXE: %s' % setStr)
                 logger.info('Setting %s with password %s' % (ip, password))
-                (status, output) = commands.getstatusoutput(setStr)
-                if status != 0:
-                    logger.error('Problem setting password')
-                    print output
-                elif len(output) != 0:
-                    logger.warning('Possible problem setting password')
-                    print output
-                else:
+                if self.ssh_command(setStr, 'set_root_passwords') == 0:
                     self.db.set_instance_password(ip, password)
