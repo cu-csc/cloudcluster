@@ -29,6 +29,11 @@ Getting cloudcluster
 
 Using cloudcluster
 
+    cd cloudcluster
+
+    Setup configuration file:
+        cp share/cloudcluster.conf.example ./cloudcluster.conf
+
     Configure the settings in cloudcluster.conf
         Specifically:
             - Place your Amazon Access ID in a file pointed to by
