@@ -25,6 +25,16 @@ def check_config(config_vals):
         rc = False
 
     try:
+        tmp = config_vals['LOCATION']
+        if (tmp != 'EC2_US_EAST') and \
+           (tmp != 'EC2_US_WEST'):
+            logger.error('Location must be EC2_US_EAST or EC2_US_WEST')
+            rc = False
+    except:
+        logger.error('LOCATION not set in cloudcluster.conf')
+        rc = False
+
+    try:
         tmp = config_vals['CLOUD_IMAGE']
     except:
         logger.error('CLOUD_IMAGE not set in cloudcluster.conf')

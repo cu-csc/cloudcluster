@@ -14,7 +14,7 @@ class CCCloud:
         self.secretkey = util.read_line(config_vals['SECRET_KEY_FILE'])
         self.keypair_name = config_vals['KEYPAIR_NAME']
         self.keypair_file = config_vals['KEYPAIR_FILE']
-        self.set_cloud_conn(config_vals['CLOUD'])
+        self.set_cloud_conn(config_vals['CLOUD'], config_vals['LOCATION'])
         self.set_image(config_vals['CLOUD_IMAGE'])
         self.set_size(config_vals['CLOUD_SIZE'])
 
@@ -32,10 +32,16 @@ class CCCloud:
             if aimage.id == cloudImage:
                 self.image = aimage
 
-    def set_cloud_conn(self, cloud):
+    def set_cloud_conn(self, cloud, location):
         self.cloud_conn = None
         if cloud == 'amazon':
-            driver = get_driver(Provider.EC2)
+            if location == 'EC2_US_WEST':
+                driver = get_driver(Provider.EC2_US_WEST)
+            elif location == 'EC2_US_EAST':
+                driver = get_driver(Provider.EC2_US_EAST)
+            else:
+                logger.error('failed to set a cloud driver')
+                sys.exit(1)
             self.cloud_conn = driver(self.accessid, self.secretkey)
         else:
             logger.error('failed to set a cloud driver')
