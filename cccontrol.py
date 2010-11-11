@@ -29,7 +29,7 @@ def check_options(options):
         logger.error('you must specify a name')
         rc = False
 
-    if len(optionSet) <= 0:
+    if 1 not in optionSet:
         logger.error('you must specify at least one main action')
         rc = False
     else:
@@ -37,7 +37,7 @@ def check_options(options):
             logger.error('you can only specify one main action')
             rc = False
 
-    if names == '':
+    if names == '' or not names:
         logger.error('you must specify a classname or classname ' + \
                      ':clustername')
         rc = False
@@ -64,7 +64,7 @@ def check_options(options):
                    (answer != 'yes'):
                     rc = False
 
-    if options.kill:
+    if options.kill and rc:
         print
         answer = raw_input('Are you sure you want to kill instances? ' + \
                            '(yes or no) ')
@@ -164,6 +164,7 @@ def parse_options():
     (options, args) = parser.parse_args()
 
     if not check_options(options):
+        parser.print_help()
         sys.exit(1)
 
     names = ''

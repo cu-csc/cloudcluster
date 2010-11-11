@@ -30,6 +30,7 @@ def parse_options():
     (options, args) = parser.parse_args()
 
     if not check_options(options):
+        parser.print_help()
         sys.exit(1)
 
     return options, args
