@@ -1,6 +1,8 @@
+import telnetlib
 import random
 import string
 import logging
+import time
 
 logger = logging.getLogger('cloudcluster')
 
@@ -67,3 +69,35 @@ def generate_random_password(length=8):
     for i in range(length-2):
         password = password + random.choice(chars + symbols)
     return password
+
+def is_port_open(hostname, port, expected='', timeout=2):
+    rc = False
+    num_tries = 1
+    while num_tries < 4:
+        logger.debug('Try %s: checking %s:%s' % (num_tries, hostname, port))
+        try:
+            logger.debug('Telneting to host %s on port %s' % (hostname, port))
+            teln = telnetlib.Telnet(hostname, port, timeout)
+            msg = teln.read_until(expected, timeout)
+            logger.debug('Connected to ' + \
+                         '%s:%s and read %s' % (hostname, port, msg))
+            logger.debug('Message length: %d' % len(msg))
+            if len(msg) <= 0:
+                rc = False
+                errorStr = 'We connected to port %s but nothing ' + \
+                           'was there'
+                errorStr = errorStr % port
+                logger.error(errorStr)
+            else:
+                logger.debug('%s:%s is up' % (hostname, port))
+                num_tries = 4
+                rc = True
+        except:
+            rc = False
+            errorStr = 'Host %s does not appear to be listening on port %s.'
+            errorStr = errorStr % (hostname, port)
+            logger.error(errorStr)
+        if rc == False:
+            time.sleep(2)
+        num_tries += 1
+    return rc

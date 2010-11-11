@@ -55,6 +55,10 @@ class CCClass:
 
     def ssh_command(self, hostname, command_str, action=''):
         rc = 0
+        if not util.is_port_open(hostname, 22, 'SSH'):
+            logger.error('Unable to ssh to %s' % hostname)
+            logger.debug('ssh failed. skipping: %s' % command_str)
+            return 1
         ssh_str = 'ssh -o \'StrictHostKeyChecking no\' -i %s root@%s %s'
         ssh_str = ssh_str % (self.cccloud.keypair_file, hostname, command_str)
         logger.debug('EXE: ' + ssh_str)
