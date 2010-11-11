@@ -41,6 +41,8 @@ Using cloudcluster
         - Don't use spaces in the class name that you specify. The cluster
           and node names will be generated automatically when you start a
           class or add an additional cluster to a class.
+        - Use the genpasswords.py script to generate a password file to
+          use with cccontrol.py for multiple clusters.
 
     Getting started
         python cccontrol.py -h
