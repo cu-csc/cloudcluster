@@ -53,14 +53,16 @@ class CCClass:
                     self.print_node(node_name)
         print
 
-    def ssh_command(self, command_string, action=''):
+    def ssh_command(self, hostname, command_str, action=''):
         rc = 0
-        logger.debug('EXE: ' + command_string)
-        (status, output) = commands.getstatusoutput(command_string)
+        ssh_str = 'ssh -o \'StrictHostKeyChecking no\' -i %s root@%s %s'
+        ssh_str = ssh_str % (self.cccloud.keypair_file, hostname, command_str)
+        logger.debug('EXE: ' + ssh_str)
+        (status, output) = commands.getstatusoutput(ssh_str)
         if status != 0:
             rc = 1
             logger.error('Problem running ssh command: ' + \
-                         '%s' % command_string)
+                         '%s' % ssh_str)
             print output
         if (action == 'set_root_password') and \
            (len(output) != 0):
@@ -113,16 +115,13 @@ class CCClass:
             for node_name in node_names:
                 name = self.db.get_instance_name(node_name)
                 private_ip = self.db.get_instance_private_ip(node_name)
-                app_str = 'ssh -o \'StrictHostKeyChecking no\' -i %s ' + \
-                          'root@%s \"echo %s %s >> /etc/hosts %s\"'
+                app_str = '\"echo %s %s >> /etc/hosts %s\"'
                 in_str = '\`host %s | awk \'{print \$4}\'\`' % private_ip
                 last_str = ';hostname %s' % name_to_set
-                ssh_str = app_str % (self.cccloud.keypair_file, \
-                                     ip, \
-                                     in_str, \
-                                     name, \
-                                     last_str)
-                if self.ssh_command(ssh_str) != 0:
+                command_str = app_str % (in_str, \
+                                         name, \
+                                         last_str)
+                if self.ssh_command(ip, command_str) != 0:
                     logger.warn('Problem configuring %s (%s)' % (name, ip))
 
     def configure_hosts(self):
@@ -169,8 +168,7 @@ class CCClass:
             i += 1
 
     def set_root_passwords(self, passwordFile=''):
-        chpasswdStr = 'ssh -o \'StrictHostKeyChecking no\' -i %s ' + \
-                      'root@%s \'echo root:%s | chpasswd\''
+        chpasswdStr = '\'echo root:%s | chpasswd\''
         self.query(False) 
 
         passwords = {}
@@ -221,8 +219,7 @@ class CCClass:
                 ip = self.db.get_instance_ip_address(node_name)
                 password = self.db.get_instance_password(node_name)
                 escaped_password = re.escape(password)
-                setStr = chpasswdStr % (self.cccloud.keypair_file, ip,
-                                        escaped_password)
+                setStr = chpasswdStr % (escaped_password)
                 logger.info('Setting %s with password %s' % (ip, password))
-                if self.ssh_command(setStr, 'set_root_passwords') == 0:
+                if self.ssh_command(ip, setStr, 'set_root_passwords') == 0:
                     self.db.set_instance_password(ip, password)
