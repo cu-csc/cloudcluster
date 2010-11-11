@@ -227,3 +227,29 @@ class CCClass:
                 logger.info('Setting %s with password %s' % (ip, password))
                 if self.ssh_command(ip, setStr, 'set_root_passwords') == 0:
                     self.db.set_instance_password(ip, password)
+
+    def test_ssh_connectivity(self):
+        def print_cluster(cluster_name):
+            cmdStr = '/bin/true'
+            node_names = self.db.get_all_cluster_node_names(self.name, \
+                                                            cluster_name)
+            for node_name in node_names:
+                ip = self.db.get_instance_ip_address(node_name)
+                name = self.db.get_instance_name(node_name)
+                infoStr = 'SSH: %s:%s :: %s'
+                if self.ssh_command(ip, cmdStr) == 0:
+                    inStr = infoStr % (name, ip, 'SUCCESS')
+                    logger.info(inStr)
+                else:
+                    inStr = infoStr % (name, ip, 'FAILURE')
+                    logger.info(inStr)
+
+        if self.cluster_name != '':
+            print_cluster(self.cluster_name)
+        else:
+            cluster_counts = self.db.get_all_cluster_counts(self.name)
+            cluster_counts.sort()
+            for cluster_count in cluster_counts:
+                cluster_name = 'cluster%02d' % cluster_count
+                print_cluster(cluster_name)
+

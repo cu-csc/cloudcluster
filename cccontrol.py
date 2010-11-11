@@ -20,6 +20,7 @@ def check_options(options):
     optionSet.append(int(options.addCluster))
     optionSet.append(int(options.setPasswords))
     optionSet.append(int(options.configureClusters))
+    optionSet.append(int(options.testSSHConnectivity))
 
     if not options.database:
         logger.error('you must specify a database')
@@ -136,6 +137,9 @@ def parse_options():
                     dest='configureClusters', help='configure the ' + \
                     'clusters /etc/hosts file and set the hostnames ' + \
                     'of a class or cluster')
+    main.add_option('-t', '--testSSHConnectivity', action='store_true', \
+                    dest='testSSHConnectivity', help='test SSH ' + \
+                    'connectivity to nodes')
     parser.add_option_group(main)
 
     extra = OptionGroup(parser, 'Additional Options', 'You might need these.')
@@ -159,7 +163,8 @@ def parse_options():
                         kill=False, \
                         addCluster=False, \
                         setPasswords=False, \
-                        configureClusters=False)
+                        configureClusters=False, \
+                        testSSHConnectivity=False)
 
     (options, args) = parser.parse_args()
 
@@ -173,7 +178,8 @@ def parse_options():
        options.kill or \
        options.addCluster or \
        options.setPasswords or \
-       options.configureClusters:
+       options.configureClusters or \
+       options.testSSHConnectivity:
         names = options.name
 
     if options.verbose:
@@ -211,6 +217,8 @@ def main():
         ccclass.set_root_passwords(options.passwordFile)
     elif options.configureClusters:
         ccclass.configure_hosts()
+    elif options.testSSHConnectivity:
+        ccclass.test_ssh_connectivity()
     else:
         logger.error('you must specify one action')
         return 1
