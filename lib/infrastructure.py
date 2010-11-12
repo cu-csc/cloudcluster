@@ -244,6 +244,7 @@ class CCClass:
                     inStr = infoStr % (name, ip, 'FAILURE')
                     logger.info(inStr)
 
+        self.query(False) 
         if self.cluster_name != '':
             print_cluster(self.cluster_name)
         else:
