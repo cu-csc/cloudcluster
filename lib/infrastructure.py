@@ -8,13 +8,15 @@ import re
 logger = logging.getLogger('cloudcluster')
 
 class CCClass:
-    def __init__(self, name, cluster_name, instance_name, db, cccloud):
+    def __init__(self, name, cluster_name, instance_name, db, cccloud, \
+                 doQuery):
         self.name = name
         self.cluster_name = cluster_name
         self.instance_name = instance_name
         self.db = db
         self.cccloud = cccloud
         self.db.add_class(name)
+        self.doQuery = doQuery
 
     def print_node(self, node_name):
         name = self.db.get_instance_name(node_name)
@@ -80,6 +82,7 @@ class CCClass:
             self.deploy_cluster(instances)
 
     def query(self, print_info=True):
+        logger.debug('running query')
         if self.cluster_name == '':
             node_names = self.db.get_all_node_names(self.name)
         else:
@@ -129,7 +132,7 @@ class CCClass:
                     logger.warn('Problem configuring %s (%s)' % (name, ip))
 
     def configure_hosts(self):
-        self.query(False) 
+        if self.doQuery: self.query(False)
         node_names = []
         if self.cluster_name != '':
             node_names = self.db.get_all_cluster_node_names(self.name, \
@@ -173,7 +176,7 @@ class CCClass:
 
     def set_root_passwords(self, passwordFile=''):
         chpasswdStr = '\'echo root:%s | chpasswd\''
-        self.query(False) 
+        if self.doQuery: self.query(False) 
 
         passwords = {}
         if passwordFile != '':
@@ -244,7 +247,7 @@ class CCClass:
                     inStr = infoStr % (name, ip, 'FAILURE')
                     logger.info(inStr)
 
-        self.query(False) 
+        if self.doQuery: self.query(False) 
         if self.cluster_name != '':
             print_cluster(self.cluster_name)
         else:

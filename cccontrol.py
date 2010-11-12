@@ -156,6 +156,8 @@ def parse_options():
                      'passwords to set, in the format: clustername password')
     extra.add_option('-v', '--verbose', action='store_true', \
                      dest = 'verbose', help = 'Verbose output')
+    extra.add_option('--no-query', action='store_false', \
+                     dest = 'doQuery', help = 'No query before action')
     parser.add_option_group(extra)
 
     parser.set_defaults(startClass=False, \
@@ -164,7 +166,8 @@ def parse_options():
                         addCluster=False, \
                         setPasswords=False, \
                         configureClusters=False, \
-                        testSSHConnectivity=False)
+                        testSSHConnectivity=False, \
+                        doQuery=True)
 
     (options, args) = parser.parse_args()
 
@@ -199,8 +202,8 @@ def main():
     logger.debug('db before command:')
     if options.verbose:
         db.print_db()
-
-    ccclass = CCClass(class_name, cluster_name, instance_name, db, cccloud)
+    ccclass = CCClass(class_name, cluster_name, instance_name, db, \
+                      cccloud, options.doQuery)
 
     if options.startClass:
         numClusters = int(options.numClusters)
